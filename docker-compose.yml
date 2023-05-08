@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  mafia-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mafia:1.0
+    container_name: mafia
+    restart: unless-stopped
+    ports:
+      - 50051:50051

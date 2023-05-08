@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package mafia;
+
+
+service Greeter {
+    rpc Ping (PingRequest) returns (PingReply) {}
+    rpc StreamPing (PingRequest) returns (stream PingReply) {}
+}
+
+message PingRequest {
+  string message = 1;
+}
+
+message PingReply {
+  string message = 1;
+}
