@@ -21,5 +21,5 @@ docker build -t mafia:1.0 && docker run mafia:1.0 --role client
 ## Generate Protos
 
 ```bash
-.venv/bin/python -m grpc_tools.protoc --python_out=. --grpc_python_out=. --pyi_out=. -I . src/grpc/schema.proto
+.venv/bin/python -m grpc_tools.protoc --python_out=. --grpc_python_out=. --pyi_out=. -I . app/grpc/schema.proto
 ```

@@ -2,7 +2,7 @@ FROM python:3.10
 
 EXPOSE 50051
 
-WORKDIR /app
+WORKDIR /
 
 COPY app app
 

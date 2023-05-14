@@ -4,8 +4,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: mafia:1.0
-    container_name: mafia
-    restart: unless-stopped
     ports:
       - 50051:50051
+    networks:
+      - mafia-network
+
+  mafia-client-bot:
+    build:
+      context: .
+    command: --role client --bot
+    networks:
+      - mafia-network
+
+networks:
+  mafia-network:
+    name: "mafia-network"
+

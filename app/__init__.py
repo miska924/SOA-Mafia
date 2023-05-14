@@ -12,5 +12,7 @@ class Role(Enum):
 def main(args):
     if Role(args.role) == Role.Server:
         run_server(port=args.port)
+    elif args.bot:
+        run_client(server_address=args.server_address)
     else:
-        run_client()
+        run_client(server_address=args.server_address)

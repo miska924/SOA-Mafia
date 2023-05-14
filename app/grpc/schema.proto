@@ -3,15 +3,33 @@ syntax = "proto3";
 package mafia;
 
 
-service Greeter {
-    rpc Ping (PingRequest) returns (PingReply) {}
-    rpc StreamPing (PingRequest) returns (stream PingReply) {}
+service Mafia {
+  rpc PlayerId (PlayerIdRequest) returns (PlayerIdResponse) {}
+  rpc Notifications (NotificationRequest) returns (stream NotificationResponse) {}
+  rpc Connected (stream ConnectionRequest) returns (stream ConnectionResponse) {}
 }
 
-message PingRequest {
+message ConnectionRequest {
+  string player_id = 1;
+  bool connected = 2;
+}
+
+message ConnectionResponse {
   string message = 1;
 }
 
-message PingReply {
+message NotificationRequest {
+  string player_id = 1;
+}
+
+message NotificationResponse {
   string message = 1;
+}
+
+message PlayerIdRequest {
+  string old_player_id = 1;
+}
+
+message PlayerIdResponse {
+  string player_id = 1;
 }
