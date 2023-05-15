@@ -19,7 +19,7 @@ class MafiaStub(object):
                 request_serializer=app_dot_grpc_dot_schema__pb2.PlayerIdRequest.SerializeToString,
                 response_deserializer=app_dot_grpc_dot_schema__pb2.PlayerIdResponse.FromString,
                 )
-        self.Notifications = channel.unary_stream(
+        self.Notifications = channel.stream_stream(
                 '/mafia.Mafia/Notifications',
                 request_serializer=app_dot_grpc_dot_schema__pb2.NotificationRequest.SerializeToString,
                 response_deserializer=app_dot_grpc_dot_schema__pb2.NotificationResponse.FromString,
@@ -28,6 +28,11 @@ class MafiaStub(object):
                 '/mafia.Mafia/Connected',
                 request_serializer=app_dot_grpc_dot_schema__pb2.ConnectionRequest.SerializeToString,
                 response_deserializer=app_dot_grpc_dot_schema__pb2.ConnectionResponse.FromString,
+                )
+        self.ListPlayers = channel.unary_unary(
+                '/mafia.Mafia/ListPlayers',
+                request_serializer=app_dot_grpc_dot_schema__pb2.ListPlayersRequest.SerializeToString,
+                response_deserializer=app_dot_grpc_dot_schema__pb2.ListPlayersResponse.FromString,
                 )
 
 
@@ -40,13 +45,19 @@ class MafiaServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Notifications(self, request, context):
+    def Notifications(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def Connected(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListPlayers(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -60,7 +71,7 @@ def add_MafiaServicer_to_server(servicer, server):
                     request_deserializer=app_dot_grpc_dot_schema__pb2.PlayerIdRequest.FromString,
                     response_serializer=app_dot_grpc_dot_schema__pb2.PlayerIdResponse.SerializeToString,
             ),
-            'Notifications': grpc.unary_stream_rpc_method_handler(
+            'Notifications': grpc.stream_stream_rpc_method_handler(
                     servicer.Notifications,
                     request_deserializer=app_dot_grpc_dot_schema__pb2.NotificationRequest.FromString,
                     response_serializer=app_dot_grpc_dot_schema__pb2.NotificationResponse.SerializeToString,
@@ -69,6 +80,11 @@ def add_MafiaServicer_to_server(servicer, server):
                     servicer.Connected,
                     request_deserializer=app_dot_grpc_dot_schema__pb2.ConnectionRequest.FromString,
                     response_serializer=app_dot_grpc_dot_schema__pb2.ConnectionResponse.SerializeToString,
+            ),
+            'ListPlayers': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListPlayers,
+                    request_deserializer=app_dot_grpc_dot_schema__pb2.ListPlayersRequest.FromString,
+                    response_serializer=app_dot_grpc_dot_schema__pb2.ListPlayersResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -98,7 +114,7 @@ class Mafia(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def Notifications(request,
+    def Notifications(request_iterator,
             target,
             options=(),
             channel_credentials=None,
@@ -108,7 +124,7 @@ class Mafia(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/mafia.Mafia/Notifications',
+        return grpc.experimental.stream_stream(request_iterator, target, '/mafia.Mafia/Notifications',
             app_dot_grpc_dot_schema__pb2.NotificationRequest.SerializeToString,
             app_dot_grpc_dot_schema__pb2.NotificationResponse.FromString,
             options, channel_credentials,
@@ -128,5 +144,22 @@ class Mafia(object):
         return grpc.experimental.stream_stream(request_iterator, target, '/mafia.Mafia/Connected',
             app_dot_grpc_dot_schema__pb2.ConnectionRequest.SerializeToString,
             app_dot_grpc_dot_schema__pb2.ConnectionResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ListPlayers(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mafia.Mafia/ListPlayers',
+            app_dot_grpc_dot_schema__pb2.ListPlayersRequest.SerializeToString,
+            app_dot_grpc_dot_schema__pb2.ListPlayersResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -3,6 +3,7 @@ from typing import List
 import logging
 import uuid
 import time
+from queue import Queue
 
 import grpc
 import app.grpc.schema_pb2 as schema
@@ -19,98 +20,135 @@ from app.definitions import (
     PLAYER_IS_GREATING_YOU,
     ALL_PLAYERS_CONNECTED,
     PLAYER_DISCONNECTED,
+    STREAM_RESPONSE_TIME_THREASHOLD,
 )
 
 
 class Mafia(schema_grpc.MafiaServicer):
     def __init__(self, **kwargs):
         super().__init__()
-        self.players_lock = threading.Lock()
-        self.players = {}
+        self.lock = threading.Lock()
+        self.players = []
+        self.names = {}
+        self.notifications = {}
+
+    def _players_count(self):
+        with self.lock:
+            return len(self.players)
+
+    def _full(self):
+        return self._players_count() == NEEDED_PLAYERS_FOR_GAME
+
+    def _notify_about_full(self):
+        for player_id in self.players:
+            with self.lock:
+                queue = self.notifications[player_id]
+
+            queue.put(ALL_PLAYERS_CONNECTED)
+
+    def _notify_about_join(self, joined_player_id):
+        for player_id in self.players:
+            if player_id == joined_player_id:
+                continue
+
+            with self.lock:
+                queue = self.notifications[player_id]
+                name = self.names[joined_player_id]
+
+            queue.put(NEW_PLAYER_CONNECTED.format(name=name))
+
+        if self._full():
+            self._notify_about_full()
+
+    def _join(self, player_id, name):
+        if self._player_exists(player_id):
+            logging.error("exists %s", player_id)
+            return None
+
+        with self.lock:
+            self.players.append(player_id)
+            self.notifications[player_id] = Queue()
+            self.names[player_id] = name
+
+        return player_id
+
+    def _get_notifications(self, player_id):
+        if not self._player_exists(player_id):
+            return Queue()
+
+        with self.lock:
+            return self.notifications[player_id]
+
+    def _notify_about_disconnect(self, disconnected_player_id):
+        for player_id in self.players:
+            if player_id == disconnected_player_id:
+                continue
+
+            with self.lock:
+                queue = self.notifications[player_id]
+                name = self.names[disconnected_player_id]
+
+            queue.put(PLAYER_DISCONNECTED.format(name=name))
+
+    def _disconnect(self, player_id):
+        if not self._player_exists(player_id):
+            return
+
+        with self.lock:
+            self.players.remove(player_id)
+
+        self._notify_about_disconnect(player_id)
+
+    def _player_exists(self, player_id):
+        with self.lock:
+            return player_id in self.players
 
     def PlayerId(self, request, context):
-        player_id = str(uuid.uuid1())
+        player_id = str(uuid.uuid4())
 
-        # notify all players about new connection
-        with self.players_lock:
-            self.players[player_id] = {NOTIFICATIONS_KEY: []}
+        if not self._join(player_id, request.name):
+            return schema.PlayerIdResponse(player_id=EMPTY)
 
-            all_players_connected = False
-            if len(self.players) == NEEDED_PLAYERS_FOR_GAME:
-                all_players_connected = True
-                self.players[player_id][NOTIFICATIONS_KEY].append(ALL_PLAYERS_CONNECTED)
-
-            for other_player_id in self.players:
-                self.players[other_player_id][NOTIFICATIONS_KEY].append(
-                    NEW_PLAYER_CONNECTED.format(player_id=player_id)
-                )
-
-                self.players[player_id][NOTIFICATIONS_KEY].append(
-                    PLAYER_IS_GREATING_YOU.format(player_id=other_player_id)
-                )
-
-                if all_players_connected:
-                    self.players[other_player_id][NOTIFICATIONS_KEY].append(
-                        ALL_PLAYERS_CONNECTED
-                    )
-
+        self._notify_about_join(player_id)
         return schema.PlayerIdResponse(player_id=player_id)
 
-    def Notifications(self, request, context):
-        player_id = request.player_id
+    def Notifications(self, request_iterator, context):
+        for request in request_iterator:
+            # if request.timestamp - time.time() > STREAM_RESPONSE_TIME_THREASHOLD:
+            #     continue
+            notifications = self._get_notifications(request.player_id)
 
-        with self.players_lock:
-            if player_id not in self.players:
-                return schema.NotificationResponse(message=EMPTY)
+            if notifications.empty():
+                yield schema.NotificationResponse(message=EMPTY)
 
-        with self.players_lock:
-            players_count = len(self.players)
-
-        # logging.info(".")
-        try:
-            while True:
-                with self.players_lock:
-                    if player_id in self.players and len(
-                        self.players[player_id][NOTIFICATIONS_KEY]
-                    ):
-                        yield schema.NotificationResponse(
-                            message=self.players[player_id][NOTIFICATIONS_KEY][0]
-                        )
-                        self.players[player_id][NOTIFICATIONS_KEY] = self.players[
-                            player_id
-                        ][NOTIFICATIONS_KEY][1:]
-
-                    players_count = len(self.players)
-                time.sleep(0.1)
-        except Exception:
-            pass
-        return
+            message = notifications.get()
+            logging.info(message)
+            yield schema.NotificationResponse(message=message)
 
     def Connected(self, request_iterator, context):
         player_id = None
         try:
             for request in request_iterator:
                 player_id = request.player_id
-                if request.connected:
-                    yield schema.ConnectionResponse(message=CONNECTED_OK)
-                else:
-                    break
+                yield schema.ConnectionResponse(message=CONNECTED_OK)
         except Exception:
             pass
 
-        # logging.info(PLAYER_DISCONNECTED.format(player_id=player_id))
-        with self.players_lock:
-            del self.players[player_id]
+        self._disconnect(player_id)
 
-            for another_player_id in self.players:
-                self.players[another_player_id][NOTIFICATIONS_KEY].append(
-                    PLAYER_DISCONNECTED.format(player_id=player_id)
-                )
-        return schema.ConnectionResponse(message=EMPTY)
+    def ListPlayers(self, request, context):
+        player_id = request.player_id
+        logging.info(player_id)
+        response = schema.ListPlayersResponse()
+        for player_id in self.players:
+            name = self.names[player_id]
+            response.name.append(name)
+
+        return response
 
 
 def serve(port):
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=100))
     schema_grpc.add_MafiaServicer_to_server(Mafia(), server)
     server.add_insecure_port("[::]:" + port)
     server.start()

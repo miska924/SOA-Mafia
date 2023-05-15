@@ -1,8 +1,8 @@
 import logging
 import grpc
 import time
-import random
 import threading
+import random
 
 from queue import Queue
 from enum import Enum
@@ -11,6 +11,8 @@ import app.grpc.schema_pb2 as schema_pb2
 import app.grpc.schema_pb2_grpc as schema_pb2_grpc
 
 from app.definitions import ALL_PLAYERS_CONNECTED, BOT_NAMES
+from app.client.heartbeat import HeartBeat
+from app.client.notifier import Notifier
 
 
 class Commands(Enum):
@@ -22,75 +24,61 @@ class Commands(Enum):
     SetPlayersNumber = "players"
 
 
-def send_connection_events(stub, player_id, stop):
-    responses = stub.Connected(generate_connection_events(player_id, stop))
+class MafiaClient:
+    def __init__(self, server_address="172.17.0.1:50051", auto=False):
+        self.auto = auto
+        if auto:
+            self.name = BOT_NAMES[random.randint(1, len(BOT_NAMES)) - 1]
+            logging.info(self.name)
+        else:
+            self.name = input("Enter player name: ")
 
-    for response in responses:
-        pass
+        if self.auto:
+            time.sleep(random.randint(1, 2000) / 100)
 
+        self.channel = grpc.insecure_channel(server_address)
+        self.stub = schema_pb2_grpc.MafiaStub(self.channel)
 
-def generate_connection_events(player_id, stop):
-    while not stop():
-        yield schema_pb2.ConnectionRequest(player_id=player_id, connected=True)
-        time.sleep(0.1)
+        self.player_id = self._get_player_id()
 
+        self.heartbeat = HeartBeat(self.stub, self.player_id)
+        self.notifier = Notifier(self.stub, self.player_id)
 
-def run_heartbeat_thread(stub, player_id):
-    stop = [False]
-    connection_events_thread = threading.Thread(
-        target=send_connection_events, args=(stub, player_id, lambda: stop[0])
-    )
+    def _get_player_id(self):
+        player_id_request = schema_pb2.PlayerIdRequest(name=self.name)
+        return self.stub.PlayerId(player_id_request).player_id
 
-    connection_events_thread.start()
-    return connection_events_thread, stop
-
-
-def get_player_id(stub):
-    player_id_request = schema_pb2.PlayerIdRequest(old_player_id="")
-    return stub.PlayerId(player_id_request).player_id
-
-
-def get_notifications(stub, player_id):
-    notifications_request = schema_pb2.NotificationRequest(player_id=player_id)
-    for response in stub.Notifications(notifications_request):
-        yield response.message
-
-
-def generator_thread_func(stub, player_id, q: Queue):
-    for value in get_notifications(stub, player_id):
-        q.put(value)
-
-
-def run(server_address="172.17.0.1:50051"):
-    with grpc.insecure_channel(server_address) as channel:
-        stub = schema_pb2_grpc.MafiaStub(channel)
-
-        player_id = get_player_id(stub)
-
-        heartbeat_thread, stop = run_heartbeat_thread(stub, player_id)
-
-        notifications = Queue()
-        generator_thread = threading.Thread(
-            target=generator_thread_func,
-            args=(stub, player_id, notifications),
-        )
-        generator_thread.start()
-
-        while generator_thread.is_alive() or not notifications.empty():
-            message = notifications.get()
-            logging.info(message)
-            if message == ALL_PLAYERS_CONNECTED:
+    def _connect(self):
+        while True:
+            notification = self.notifier.next()
+            print(notification)
+            if notification == ALL_PLAYERS_CONNECTED:
                 break
 
-        alive = random.randint(1, 1000) / 100
+    def run(self):
+        self._connect()
+
+        alive = random.randint(1, 2000) / 100
         start = time.time()
 
-        while (
-            generator_thread.is_alive() or not notifications.empty()
-        ) and time.time() - start < alive:
-            if not notifications.empty():
-                logging.info(notifications.get())
+        while True:
+            if self.auto:
+                continue
+            else:
+                command = input("Enter command(one of [list, disconnect]): ")
 
-        stop[0] = True
-        heartbeat_thread.join()
-        generator_thread.join()
+            if command == "list":
+                response: schema_pb2.ListPlayersResponse = self.stub.ListPlayers(
+                    schema_pb2.ListPlayersRequest(player_id=self.player_id)
+                )
+                print("\n".join(list(response.name)))
+            elif command == "disconnect":
+                break
+
+        while True:
+            notification = self.notifier.next_no_wait(default=None)
+            if notification:
+                logging.info(notification)
+
+        self.notifier.stop()
+        self.heartbeat.stop()

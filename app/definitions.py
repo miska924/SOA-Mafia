@@ -3,10 +3,10 @@ NOTIFICATIONS_KEY = "notifications"
 CONNECTED_OK = "OK"
 EMPTY = ""
 
-NEW_PLAYER_CONNECTED = "New player connected: {player_id}!"
-PLAYER_IS_GREATING_YOU = "Player {player_id} is greating you!"
+NEW_PLAYER_CONNECTED = "New player connected: {name}!"
+PLAYER_IS_GREATING_YOU = "Player {name} is greating you!"
 ALL_PLAYERS_CONNECTED = "All players connected!"
-PLAYER_DISCONNECTED = "Player {player_id} disconnected"
+PLAYER_DISCONNECTED = "Player {name} disconnected"
 
 BOT_NAMES = [
     "Jayson Christensen",
@@ -46,3 +46,5 @@ BOT_NAMES = [
     "Tia May",
     "Reginald Abbott",
 ]
+
+STREAM_RESPONSE_TIME_THREASHOLD = 1
