@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  mafia-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 50051:50051
+    networks:
+      - mafia-network
+
+  mafia-client-bot:
+    build:
+      context: .
+    command: --role client --bot
+    networks:
+      - mafia-network
+
+networks:
+  mafia-network:
+    name: "mafia-network"
+

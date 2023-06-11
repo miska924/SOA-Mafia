@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package mafia;
+
+
+service Mafia {
+  rpc PlayerId (PlayerIdRequest) returns (PlayerIdResponse) {}
+  rpc Notifications (stream NotificationRequest) returns (stream NotificationResponse) {}
+  rpc Connected (stream ConnectionRequest) returns (stream ConnectionResponse) {}
+  rpc ListPlayers (ListPlayersRequest) returns (ListPlayersResponse) {}
+  rpc Role (RoleRequest) returns (RoleResponse) {}
+  rpc Kill (KillRequest) returns (KillResponse) {}
+  rpc Check (CheckRequest) returns (CheckResponse) {}
+  rpc Vote (VoteRequest) returns (VoteResponse) {}
+  rpc IsAlive (IsAliveRequest) returns (IsAliveResponse) {}
+  rpc Turn (TurnRequest) returns (TurnResponse) {}
+}
+
+message ConnectionRequest {
+  string player_id = 1;
+}
+
+message ConnectionResponse {
+  string message = 1;
+}
+
+message NotificationRequest {
+  string player_id = 1;
+  int64 timestamp = 2;
+}
+
+message NotificationResponse {
+  string message = 1;
+}
+
+message PlayerIdRequest {
+  string name = 1;
+}
+
+message PlayerIdResponse {
+  string player_id = 1;
+}
+
+message ListPlayersRequest {
+  string player_id = 1;
+}
+
+message ListPlayersResponse {
+  repeated string name = 1;
+}
+
+message KillRequest {
+  string player_id = 1;
+  string name = 2;
+}
+
+message KillResponse {
+  string message = 1;
+}
+
+message VoteRequest {
+  string player_id = 1;
+  string name = 2;
+}
+
+message VoteResponse {
+  string message = 1;
+}
+
+message CheckRequest {
+  string name = 1;
+}
+
+message CheckResponse {
+  string message = 1;
+  bool is_mafia = 2;
+}
+
+message RoleRequest {
+  string player_id = 1;
+}
+
+message RoleResponse {
+  string role = 1;
+}
+
+message IsAliveRequest {
+  string player_id = 1;
+}
+
+message IsAliveResponse {
+  bool is_alive = 1;
+}
+
+message TurnRequest {
+  string player_id = 1;
+}
+
+message TurnResponse {
+  string message = 1;
+}
