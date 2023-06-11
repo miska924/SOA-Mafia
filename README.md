@@ -6,10 +6,10 @@ You need to install Docker & Docker-Compose if have not installed yet.
 
 Follow docker & docker-compose installation guide [here](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
 
-## Server & 4 bots
+## Server & 5 bots (autoplay)
 
 ```bash
-docker compose up --build --scale mafia-client-bot=4
+docker compose up --build --scale mafia-client-bot=5
 ```
 
 ## Client

@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x61pp/grpc/schema.proto\x12\x05mafia\"&\n\x11\x43onnectionRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"%\n\x12\x43onnectionResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\";\n\x13NotificationRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x02 \x01(\x03\"\'\n\x14NotificationResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1f\n\x0fPlayerIdRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"%\n\x10PlayerIdResponse\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"\'\n\x12ListPlayersRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"#\n\x13ListPlayersResponse\x12\x0c\n\x04name\x18\x01 \x03(\t2\xa6\x02\n\x05Mafia\x12=\n\x08PlayerId\x12\x16.mafia.PlayerIdRequest\x1a\x17.mafia.PlayerIdResponse\"\x00\x12N\n\rNotifications\x12\x1a.mafia.NotificationRequest\x1a\x1b.mafia.NotificationResponse\"\x00(\x01\x30\x01\x12\x46\n\tConnected\x12\x18.mafia.ConnectionRequest\x1a\x19.mafia.ConnectionResponse\"\x00(\x01\x30\x01\x12\x46\n\x0bListPlayers\x12\x19.mafia.ListPlayersRequest\x1a\x1a.mafia.ListPlayersResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x61pp/grpc/schema.proto\x12\x05mafia\"&\n\x11\x43onnectionRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"%\n\x12\x43onnectionResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\";\n\x13NotificationRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x02 \x01(\x03\"\'\n\x14NotificationResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1f\n\x0fPlayerIdRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"%\n\x10PlayerIdResponse\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"\'\n\x12ListPlayersRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"#\n\x13ListPlayersResponse\x12\x0c\n\x04name\x18\x01 \x03(\t\".\n\x0bKillRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"\x1f\n\x0cKillResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\".\n\x0bVoteRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"\x1f\n\x0cVoteResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1c\n\x0c\x43heckRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"2\n\rCheckResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x10\n\x08is_mafia\x18\x02 \x01(\x08\" \n\x0bRoleRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"\x1c\n\x0cRoleResponse\x12\x0c\n\x04role\x18\x01 \x01(\t\"#\n\x0eIsAliveRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"#\n\x0fIsAliveResponse\x12\x10\n\x08is_alive\x18\x01 \x01(\x08\" \n\x0bTurnRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"\x1f\n\x0cTurnResponse\x12\x0f\n\x07message\x18\x01 \x01(\t2\xe4\x04\n\x05Mafia\x12=\n\x08PlayerId\x12\x16.mafia.PlayerIdRequest\x1a\x17.mafia.PlayerIdResponse\"\x00\x12N\n\rNotifications\x12\x1a.mafia.NotificationRequest\x1a\x1b.mafia.NotificationResponse\"\x00(\x01\x30\x01\x12\x46\n\tConnected\x12\x18.mafia.ConnectionRequest\x1a\x19.mafia.ConnectionResponse\"\x00(\x01\x30\x01\x12\x46\n\x0bListPlayers\x12\x19.mafia.ListPlayersRequest\x1a\x1a.mafia.ListPlayersResponse\"\x00\x12\x31\n\x04Role\x12\x12.mafia.RoleRequest\x1a\x13.mafia.RoleResponse\"\x00\x12\x31\n\x04Kill\x12\x12.mafia.KillRequest\x1a\x13.mafia.KillResponse\"\x00\x12\x34\n\x05\x43heck\x12\x13.mafia.CheckRequest\x1a\x14.mafia.CheckResponse\"\x00\x12\x31\n\x04Vote\x12\x12.mafia.VoteRequest\x1a\x13.mafia.VoteResponse\"\x00\x12:\n\x07IsAlive\x12\x15.mafia.IsAliveRequest\x1a\x16.mafia.IsAliveResponse\"\x00\x12\x31\n\x04Turn\x12\x12.mafia.TurnRequest\x1a\x13.mafia.TurnResponse\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'app.grpc.schema_pb2', globals())
@@ -36,6 +36,30 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _LISTPLAYERSREQUEST._serialized_end=324
   _LISTPLAYERSRESPONSE._serialized_start=326
   _LISTPLAYERSRESPONSE._serialized_end=361
-  _MAFIA._serialized_start=364
-  _MAFIA._serialized_end=658
+  _KILLREQUEST._serialized_start=363
+  _KILLREQUEST._serialized_end=409
+  _KILLRESPONSE._serialized_start=411
+  _KILLRESPONSE._serialized_end=442
+  _VOTEREQUEST._serialized_start=444
+  _VOTEREQUEST._serialized_end=490
+  _VOTERESPONSE._serialized_start=492
+  _VOTERESPONSE._serialized_end=523
+  _CHECKREQUEST._serialized_start=525
+  _CHECKREQUEST._serialized_end=553
+  _CHECKRESPONSE._serialized_start=555
+  _CHECKRESPONSE._serialized_end=605
+  _ROLEREQUEST._serialized_start=607
+  _ROLEREQUEST._serialized_end=639
+  _ROLERESPONSE._serialized_start=641
+  _ROLERESPONSE._serialized_end=669
+  _ISALIVEREQUEST._serialized_start=671
+  _ISALIVEREQUEST._serialized_end=706
+  _ISALIVERESPONSE._serialized_start=708
+  _ISALIVERESPONSE._serialized_end=743
+  _TURNREQUEST._serialized_start=745
+  _TURNREQUEST._serialized_end=777
+  _TURNRESPONSE._serialized_start=779
+  _TURNRESPONSE._serialized_end=810
+  _MAFIA._serialized_start=813
+  _MAFIA._serialized_end=1425
 # @@protoc_insertion_point(module_scope)

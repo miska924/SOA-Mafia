@@ -1,5 +1,6 @@
 from concurrent import futures
 from typing import List
+from random import shuffle, choice
 import logging
 import uuid
 import time
@@ -21,6 +22,8 @@ from app.definitions import (
     ALL_PLAYERS_CONNECTED,
     PLAYER_DISCONNECTED,
     STREAM_RESPONSE_TIME_THREASHOLD,
+    ROLES,
+    Role,
 )
 
 
@@ -30,7 +33,17 @@ class Mafia(schema_grpc.MafiaServicer):
         self.lock = threading.Lock()
         self.players = []
         self.names = {}
+        self.player_by_name = {}
+        self.roles = {}
+        self.alive = {}
         self.notifications = {}
+        self.votes = {}
+        self.turn = set()
+        self.alive_players_count = 0
+        self.to_kill_player_id = None
+
+        self.roles_left = ROLES.copy()
+        shuffle(self.roles_left)
 
     def _players_count(self):
         with self.lock:
@@ -69,6 +82,14 @@ class Mafia(schema_grpc.MafiaServicer):
             self.players.append(player_id)
             self.notifications[player_id] = Queue()
             self.names[player_id] = name
+            self.player_by_name[name] = player_id
+
+            self.alive[player_id] = True
+
+            self.roles[player_id] = self.roles_left[-1]
+            self.roles_left = self.roles_left[:-1]
+            self.votes[player_id] = 0
+            self.alive_players_count += 1
 
         return player_id
 
@@ -96,12 +117,27 @@ class Mafia(schema_grpc.MafiaServicer):
 
         with self.lock:
             self.players.remove(player_id)
+            del self.notifications[player_id]
+            del self.player_by_name[self.names[player_id]]
+            del self.names[player_id]
+            del self.alive[player_id]
+            del self.votes[player_id]
+            self.alive_players_count -= 1
+
+            self.roles_left.append(self.roles[player_id])
+            del self.roles[player_id]
 
         self._notify_about_disconnect(player_id)
 
     def _player_exists(self, player_id):
         with self.lock:
             return player_id in self.players
+
+    def _mafia_alive(self):
+        for player_id in self.alive:
+            if self.roles[player_id] == Role.MAFIA.value:
+                return self.alive[player_id]
+        return False
 
     def PlayerId(self, request, context):
         player_id = str(uuid.uuid4())
@@ -138,12 +174,141 @@ class Mafia(schema_grpc.MafiaServicer):
 
     def ListPlayers(self, request, context):
         player_id = request.player_id
-        logging.info(player_id)
         response = schema.ListPlayersResponse()
         for player_id in self.players:
-            name = self.names[player_id]
-            response.name.append(name)
+            if self.alive[player_id]:
+                name = self.names[player_id]
+                response.name.append(name)
 
+        return response
+
+    def Role(self, request, context):
+        player_id = request.player_id
+        response = schema.RoleResponse()
+        response.role = self.roles[player_id]
+        return response
+
+    def Kill(self, request, context):
+        response = schema.KillResponse()
+        if not request.name:
+            player_id = choice(self.players)
+        elif request.name not in self.player_by_name:
+            response.message = "No such player"
+            return response
+        else:
+            player_id = self.player_by_name[request.name]
+
+        if not self.alive[player_id]:
+            response.message = "Player is not alive"
+            return response
+
+        if request.player_id == player_id:
+            response.message = "You cannot suicide"
+            return response
+
+        with self.lock:
+            self.alive[player_id] = False
+            self.to_kill_player_id = player_id
+        response.message = f"Ok. {self.names[player_id]} killed."
+        return response
+
+    def _count_votes(self):
+        votes_sum = 0
+        with self.lock:
+            for player_id in self.votes:
+                votes_sum += self.votes[player_id]
+        return votes_sum
+
+    def _clear_votes(self):
+        with self.lock:
+            for player_id in self.votes:
+                self.votes[player_id] = 0
+
+    def _max_voted_player_id(self):
+        max_player_id = None
+        with self.lock:
+            for player_id in self.votes:
+                if (
+                    max_player_id is None
+                    or self.votes[player_id] > self.votes[max_player_id]
+                ):
+                    max_player_id = player_id
+        return max_player_id
+
+    def Vote(self, request, context):
+        response = schema.VoteResponse()
+        if not request.name:
+            player_id = choice(self.players)
+        elif request.name not in self.player_by_name:
+            response.message = "No such player"
+            return response
+        else:
+            player_id = self.player_by_name[request.name]
+
+        if not self.alive[player_id]:
+            response.message = "Player is not alive"
+            return response
+
+        if request.player_id == player_id:
+            response.message = "You cannot vote for yourself"
+            return response
+
+        with self.lock:
+            self.votes[player_id] += 1
+        response.message = f"Ok. Vote for {self.names[player_id]}."
+
+        if self._count_votes() == self.alive_players_count:
+            self.to_kill_player_id = self._max_voted_player_id()
+            self.alive[self.to_kill_player_id] = False
+            self._clear_votes()
+
+        return response
+
+    def IsAlive(self, request, context):
+        player_id = request.player_id
+        response = schema.IsAliveResponse()
+        response.is_alive = self.alive[player_id]
+        return response
+
+    def Turn(self, request, context):
+        with self.lock:
+            self.turn.add(request.player_id)
+
+        while len(self.turn) != self.alive_players_count:
+            time.sleep(0.1)
+
+        time.sleep(0.5)
+        self.turn.remove(request.player_id)
+
+        response = schema.TurnResponse()
+        if self._mafia_alive():
+            if self.alive_players_count - bool(self.to_kill_player_id) == 1:
+                response.message = "Congrats! Mafia wins"
+        else:
+            response.message = "Congrats! Citizens win"
+
+        with self.lock:
+            if self.to_kill_player_id == request.player_id:
+                self.to_kill_player_id = None
+                self.alive_players_count -= 1
+
+        return response
+
+    def Check(self, request, context):
+        # logging.info("Check called")
+        response = schema.CheckResponse()
+        if not request.name:
+            player_id = choice(self.players)
+        elif request.name not in self.player_by_name:
+            response.message = "No such player"
+            # logging.info(response.message)
+            return response
+        else:
+            player_id = self.player_by_name[request.name]
+
+        response.is_mafia = self.roles[player_id] == Role.MAFIA.value
+        response.message = f"Ok. {self.names[player_id]} {'is' if response.is_mafia else 'is not'} mafia."
+        # logging.info(response.message)
         return response
 
 

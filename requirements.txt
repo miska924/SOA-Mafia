@@ -1,3 +1,4 @@
 grpcio==1.54.0
 grpcio-tools==1.54.0
 argparse==1.4.0
+faker==18.7.0

@@ -34,6 +34,36 @@ class MafiaStub(object):
                 request_serializer=app_dot_grpc_dot_schema__pb2.ListPlayersRequest.SerializeToString,
                 response_deserializer=app_dot_grpc_dot_schema__pb2.ListPlayersResponse.FromString,
                 )
+        self.Role = channel.unary_unary(
+                '/mafia.Mafia/Role',
+                request_serializer=app_dot_grpc_dot_schema__pb2.RoleRequest.SerializeToString,
+                response_deserializer=app_dot_grpc_dot_schema__pb2.RoleResponse.FromString,
+                )
+        self.Kill = channel.unary_unary(
+                '/mafia.Mafia/Kill',
+                request_serializer=app_dot_grpc_dot_schema__pb2.KillRequest.SerializeToString,
+                response_deserializer=app_dot_grpc_dot_schema__pb2.KillResponse.FromString,
+                )
+        self.Check = channel.unary_unary(
+                '/mafia.Mafia/Check',
+                request_serializer=app_dot_grpc_dot_schema__pb2.CheckRequest.SerializeToString,
+                response_deserializer=app_dot_grpc_dot_schema__pb2.CheckResponse.FromString,
+                )
+        self.Vote = channel.unary_unary(
+                '/mafia.Mafia/Vote',
+                request_serializer=app_dot_grpc_dot_schema__pb2.VoteRequest.SerializeToString,
+                response_deserializer=app_dot_grpc_dot_schema__pb2.VoteResponse.FromString,
+                )
+        self.IsAlive = channel.unary_unary(
+                '/mafia.Mafia/IsAlive',
+                request_serializer=app_dot_grpc_dot_schema__pb2.IsAliveRequest.SerializeToString,
+                response_deserializer=app_dot_grpc_dot_schema__pb2.IsAliveResponse.FromString,
+                )
+        self.Turn = channel.unary_unary(
+                '/mafia.Mafia/Turn',
+                request_serializer=app_dot_grpc_dot_schema__pb2.TurnRequest.SerializeToString,
+                response_deserializer=app_dot_grpc_dot_schema__pb2.TurnResponse.FromString,
+                )
 
 
 class MafiaServicer(object):
@@ -63,6 +93,42 @@ class MafiaServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Role(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Kill(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Check(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Vote(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def IsAlive(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Turn(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_MafiaServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -85,6 +151,36 @@ def add_MafiaServicer_to_server(servicer, server):
                     servicer.ListPlayers,
                     request_deserializer=app_dot_grpc_dot_schema__pb2.ListPlayersRequest.FromString,
                     response_serializer=app_dot_grpc_dot_schema__pb2.ListPlayersResponse.SerializeToString,
+            ),
+            'Role': grpc.unary_unary_rpc_method_handler(
+                    servicer.Role,
+                    request_deserializer=app_dot_grpc_dot_schema__pb2.RoleRequest.FromString,
+                    response_serializer=app_dot_grpc_dot_schema__pb2.RoleResponse.SerializeToString,
+            ),
+            'Kill': grpc.unary_unary_rpc_method_handler(
+                    servicer.Kill,
+                    request_deserializer=app_dot_grpc_dot_schema__pb2.KillRequest.FromString,
+                    response_serializer=app_dot_grpc_dot_schema__pb2.KillResponse.SerializeToString,
+            ),
+            'Check': grpc.unary_unary_rpc_method_handler(
+                    servicer.Check,
+                    request_deserializer=app_dot_grpc_dot_schema__pb2.CheckRequest.FromString,
+                    response_serializer=app_dot_grpc_dot_schema__pb2.CheckResponse.SerializeToString,
+            ),
+            'Vote': grpc.unary_unary_rpc_method_handler(
+                    servicer.Vote,
+                    request_deserializer=app_dot_grpc_dot_schema__pb2.VoteRequest.FromString,
+                    response_serializer=app_dot_grpc_dot_schema__pb2.VoteResponse.SerializeToString,
+            ),
+            'IsAlive': grpc.unary_unary_rpc_method_handler(
+                    servicer.IsAlive,
+                    request_deserializer=app_dot_grpc_dot_schema__pb2.IsAliveRequest.FromString,
+                    response_serializer=app_dot_grpc_dot_schema__pb2.IsAliveResponse.SerializeToString,
+            ),
+            'Turn': grpc.unary_unary_rpc_method_handler(
+                    servicer.Turn,
+                    request_deserializer=app_dot_grpc_dot_schema__pb2.TurnRequest.FromString,
+                    response_serializer=app_dot_grpc_dot_schema__pb2.TurnResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -161,5 +257,107 @@ class Mafia(object):
         return grpc.experimental.unary_unary(request, target, '/mafia.Mafia/ListPlayers',
             app_dot_grpc_dot_schema__pb2.ListPlayersRequest.SerializeToString,
             app_dot_grpc_dot_schema__pb2.ListPlayersResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Role(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mafia.Mafia/Role',
+            app_dot_grpc_dot_schema__pb2.RoleRequest.SerializeToString,
+            app_dot_grpc_dot_schema__pb2.RoleResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Kill(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mafia.Mafia/Kill',
+            app_dot_grpc_dot_schema__pb2.KillRequest.SerializeToString,
+            app_dot_grpc_dot_schema__pb2.KillResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Check(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mafia.Mafia/Check',
+            app_dot_grpc_dot_schema__pb2.CheckRequest.SerializeToString,
+            app_dot_grpc_dot_schema__pb2.CheckResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Vote(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mafia.Mafia/Vote',
+            app_dot_grpc_dot_schema__pb2.VoteRequest.SerializeToString,
+            app_dot_grpc_dot_schema__pb2.VoteResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def IsAlive(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mafia.Mafia/IsAlive',
+            app_dot_grpc_dot_schema__pb2.IsAliveRequest.SerializeToString,
+            app_dot_grpc_dot_schema__pb2.IsAliveResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Turn(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mafia.Mafia/Turn',
+            app_dot_grpc_dot_schema__pb2.TurnRequest.SerializeToString,
+            app_dot_grpc_dot_schema__pb2.TurnResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

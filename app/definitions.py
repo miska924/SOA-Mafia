@@ -1,3 +1,26 @@
+from enum import Enum
+import time
+
+
+class Commands(Enum):
+    LIST = "list"
+    CHECK = "check"
+    KILL = "kill"
+    PROCEED = "proceed"
+    VOTE = "vote"
+
+
+class Role(Enum):
+    SIMPLE = "simple"
+    POLICE = "police"
+    MAFIA = "mafia"
+
+
+class Time(Enum):
+    DAY = "day"
+    NIGHT = "night"
+
+
 NEEDED_PLAYERS_FOR_GAME = 5
 NOTIFICATIONS_KEY = "notifications"
 CONNECTED_OK = "OK"
@@ -48,3 +71,13 @@ BOT_NAMES = [
 ]
 
 STREAM_RESPONSE_TIME_THREASHOLD = 1
+BOT_WAIT_MAX_MILLIS = 2000
+MAGIC_SEED = int(time.time() * 1000)
+
+ROLES = [
+    Role.MAFIA.value,
+    Role.POLICE.value,
+    Role.SIMPLE.value,
+    Role.SIMPLE.value,
+    Role.SIMPLE.value,
+]
