@@ -282,7 +282,7 @@ class Mafia(schema_grpc.MafiaServicer):
 
         response = schema.TurnResponse()
         if self._mafia_alive():
-            if self.alive_players_count - bool(self.to_kill_player_id) == 1:
+            if self.alive_players_count - bool(self.to_kill_player_id) < 3:
                 response.message = "Congrats! Mafia wins"
         else:
             response.message = "Congrats! Citizens win"
